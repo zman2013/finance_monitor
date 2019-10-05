@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+
+
+<div id="app">
+
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu-item index="1" style="height:20px;line-height: 20px"><a href="/" target="_self">指数走势</a></el-menu-item>
+        <el-menu-item index="2" style="height:20px;line-height: 20px"><a href="/m2" target="_self">货币供应</a>
+        </el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/stock_finance/600000.SH" target="_self">个股</a>
+        </el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/select_by_quarter_inc_view"
+                                                                         target="_self">季度</a></el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/index_pe_view" target="_self">PE</a>
+        </el-menu-item>
+    </el-menu>
+
+    <template>
+        <!-- 时间 -->
+        <el-select v-model="sjValueCode" clearable filterable placeholder="起始时间">
+            <el-option
+                    v-for="item in sjItemOptions"
+                    :label="item.name"
+                    :value="item.value"
+            >
+            </el-option>
+        </el-select>
+
+        <!-- 加载数据，展示图表 -->
+        <el-button @click="showAllChart">加载数据</el-button>
+    </template>
+
+    <!-- 工业指标 -->
+    <template v-for="label in labelList">
+        <div :id="label.valuecode" style="height:400px;"></div>
+        <div v-text="label.tip"></div>
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!-- echart -->
+<script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                sjItemOptions: [
+                    {name: '2006', value:'2006-'},
+                    {name: '2011', value:'2011-'},
+                    {name: '2013', value:'2013-'},
+                    {name: '2017', value:'2017-'}
+                ],
+                sjValueCode: '2006-',
+                labelList: [
+                    {
+                        valuecode: 'A010101',
+                        title: '全国居民消费价格指数',
+                        legends: ['居民消费价格指数(上年同月=100)'],
+                        tip: "阿斯顿发送到发送到"
+                    },{
+                        valuecode: 'A020A',
+                        title: '工业企业主要经济指标',
+                        legends: ['营业收入_累计增长','营业利润_累计增长','亏损企业_增减']
+                    },{
+                        valuecode: 'A0E01',
+                        title: '全国城镇调查失业率',
+                        legends: ['全国城镇调查失业率','31个大城市城镇调查失业率']
+                    },{
+                        valuecode: 'A0609',
+                        title: '商品房销售',
+                        legends: ['商品房销售额_累计增长','商品房现房销售额_累计增长','商品房期房销售额_累计增长']
+                    },{
+                        valuecode: 'A0601',
+                        title: '房地产投资',
+                        legends: ['房地产投资_累计增长'],
+                        tip: '房地产投资增长比基建股涨提前半年：2015-2016走势'
+                    },{
+                        valuecode: 'A0701',
+                        title: '社销品',
+                        legends: ['社会消费品零售总额_同比增长','社会消费品零售总额_累计增长']
+                    },{
+                        valuecode: 'A0801',
+                        title: '进出口总额',
+                        legends: ['出口总值_同比增长','进口总值_同比增长']
+                    },{
+                        valuecode: 'A0B01',
+                        title: '采购经理指数',
+                        legends: ['制造业采购经理指数','新订单指数','出厂价格指数']
+                    },{
+                        valuecode: 'A0C01',
+                        title: '财政收入',
+                        legends: ['国家财政收入_累计增长']
+                    },{
+                        valuecode: 'A0C02',
+                        title: '财政支出',
+                        legends: ['国家财政支出(不含债务还本)_累计增长']
+                    },{
+                        valuecode: 'A0D01',
+                        title: '货币供应量',
+                        legends: ['货币和准货币(M2)供应量_同比增长','货币(M1)供应量_同比增长','流通中现金(M0)供应量_同比增长']
+                    },{
+                        valuecode: 'A03010G',
+                        title: '发电量',
+                        legends: ['发电量_累计增长']
+                    },{
+                        valuecode: 'A0401',
+                        title: '固定资产投资概况',
+                        legends: ['固定资产投资额_累计增长']
+                    },
+                ]
+            };
+        },
+        created: function () {
+        },
+        methods: {
+            showAllChart(){
+                for( var i = 0; i < this.labelList.length; i ++){
+                    var label = this.labelList[i]
+                    // init echart
+                    var chart = echarts.init(document.getElementById(label.valuecode));
+                    // 设置option
+                    chart.setOption(chartOptions);
+                    // 画图
+                    this.showChart(chart, label)
+                }
+            },
+
+            showChart(chart, label) {   // 加载数据，显示图表
+                // 异步加载数据
+                axios.get("/country_database/query_data",
+                    {
+                        params: {
+                            wdcode: 'zb',
+                            valuecode: label.valuecode,
+                            sj_valuecode: this.sjValueCode,
+                        }
+                    })
+                    .then(response => {
+                        // 筛选显示的指标
+                        var showLegend = {}
+                        for( var i = 0; i < response.data.names.length; i ++ ){
+                            var name = response.data.names[i]
+                            if( label.legends.indexOf(name) > -1 ){
+                                showLegend[name] = true
+                            }else{
+                                showLegend[name] = false
+                            }
+                        }
+
+                        // 填入数据
+                        chart.setOption({
+                            title:{
+                              text: label.title
+                            },
+                            legend: {
+                                data: response.data.names,
+                                selected: showLegend
+                            },
+
+                            xAxis: [
+                                {
+                                    data: response.data.index
+                                }],
+
+                            series: response.data.data
+                        });
+                    })
+            },
+        }
+    })
+</script>
+
+<script type="text/javascript">
+
+    //
+    var chartOptions = {
+        title: {    // 标题
+            text: '国家统计局数据',
+            x: 'center',
+            top: 10
+        },
+        tooltip: {  // 提示
+            trigger: 'axis',
+            position: function (pt) {
+                return [pt[0], '10%'];
+            }
+        },
+        legend: {   // 指标
+            type: 'scroll',
+            orient: 'vertical',
+            left: '80%',
+            /*data: data.legendData,
+
+            selected: data.selected*/
+        },
+        grid: { // 图表所在绘图区与边界的距离
+            right: '20%',
+            left: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '',
+                position: 'left',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+        ],
+        dataZoom: [{    // 可缩放x轴
+            type: 'inside',
+            start: 0,
+            end: 100
+        }, {
+            start: 0,
+            end: 100,
+            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+            handleSize: '80%',
+            handleStyle: {
+                color: '#fff',
+                shadowBlur: 3,
+                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                shadowOffsetX: 2,
+                shadowOffsetY: 2
+            }
+        }],
+        series: []
+    }
+
+
+
+
+</script>
+</html>

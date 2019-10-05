@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+
+
+<div id="app">
+
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu-item index="1" style="height:20px;line-height: 20px"><a href="/" target="_self">指数走势</a></el-menu-item>
+        <el-menu-item index="2" style="height:20px;line-height: 20px"><a href="/m2" target="_self">货币供应</a>
+        </el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/stock_finance/600000.SH" target="_self">个股</a>
+        </el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/select_by_quarter_inc_view"
+                                                                         target="_self">季度</a></el-menu-item>
+        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/index_pe_view" target="_self">PE</a>
+        </el-menu-item>
+    </el-menu>
+
+    <template>
+        <!-- 第一级菜单 -->
+        <el-select v-model="firstItem" clearable filterable @change="loadSecondItemOptions" placeholder="请选择">
+            <el-option
+                    v-for="item in firstItemOptions"
+                    :label="item.name"
+                    :value="item.id"
+            >
+            </el-option>
+        </el-select>
+        <!-- 第二级菜单 -->
+        <el-select v-model="secondItem" clearable filterable @change="loadThirdItemOptions" placeholder="请选择">
+            <el-option
+                    v-for="item in secondItemOptions"
+                    :label="item.name"
+                    :value="item.id"
+            >
+            </el-option>
+        </el-select>
+        <!-- 第三级菜单 -->
+        <el-select v-model="thirdItem" clearable filterable @change="loadFourthItemOptions" placeholder="请选择">
+            <el-option
+                    v-for="item in thirdItemOptions"
+                    :label="item.name"
+                    :value="item.id"
+            >
+            </el-option>
+        </el-select>
+        <!-- 第四级菜单 -->
+        <el-select v-model="fourthItem" clearable filterable placeholder="请选择">
+            <el-option
+                    v-for="item in fourthItemOptions"
+                    :label="item.name"
+                    :value="item.id"
+            >
+            </el-option>
+        </el-select>
+        <!-- 时间 -->
+        <el-select v-model="sjValueCode" clearable filterable placeholder="起始时间">
+            <el-option
+                    v-for="item in sjItemOptions"
+                    :label="item.name"
+                    :value="item.value"
+            >
+            </el-option>
+        </el-select>
+
+        <!-- 加载数据，展示图表 -->
+        <el-button @click="showChart">加载数据</el-button>
+    </template>
+
+    <template>
+        <div id="pe_chart" style="height:400px;"></div>
+        <div style="font-weight: bold">PE太高下跌风险越高，应考虑卖出，PE太低则上涨概率越高，应考虑买入</div>
+        <div>当PE靠近历史低位时提示买入</div>
+        <div>当PE靠近历史高位时提示卖出</div>
+
+    </template>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!-- echart -->
+<script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                firstItemOptions: '',
+                firstItem: '',
+                secondItemOptions: '',
+                secondItem: '',
+                thirdItemOptions: '',
+                thirdItem: '',
+                fourthItemOptions: '',
+                fourthItem: '',
+                sjItemOptions: [
+                    {name: '2006', value:'2006-'},
+                    {name: '2011', value:'2011-'},
+                    {name: '2013', value:'2013-'},
+                    {name: '2017', value:'2017-'}
+                ],
+                sjValueCode: '2006-'
+            };
+        },
+        created: function () {
+            this.fetchFirstItemOptions()
+        },
+        methods: {
+            fetchFirstItemOptions() {
+                axios.get("/country_database/item_options", {
+                    params: {
+                        id: 'zb'
+                    }
+                })
+                    .then(response => {
+                        this.firstItemOptions = response.data
+                    })
+            },
+            loadSecondItemOptions() {
+                axios.get("/country_database/item_options",
+                    {
+                        params: {
+                            id: this.firstItem
+                        }
+                    })
+                    .then(response => {
+                        this.secondItemOptions = response.data
+                        this.secondItem = ''
+                    })
+            },
+            loadThirdItemOptions() {
+                axios.get("/country_database/item_options",
+                    {
+                        params: {
+                            id: this.secondItem
+                        }
+                    })
+                    .then(response => {
+                        this.thirdItemOptions = response.data
+                        this.thirdItem = ''
+                    })
+            },
+            loadFourthItemOptions() {
+                axios.get("/country_database/item_options",
+                    {
+                        params: {
+                            id: this.thirdItem
+                        }
+                    })
+                    .then(response => {
+                        this.fourthItemOptions = response.data
+                        this.fourthItem = ''
+                    })
+            },
+            showChart() {   // 加载数据，显示图表
+
+                // 清空chart样式和数据
+                myChart.clear()
+                // 初始化chart样式
+                myChart.setOption(chartOptions);
+
+                valuecode = this.thirdItem
+                if (this.thirdItem === '') {
+                    if (this.secondItem !== '') {
+                        valuecode = this.secondItem
+                    } else {
+                        valuecode = this.firstItem
+                    }
+                }
+                // 异步加载数据
+                axios.get("/country_database/query_data",
+                    {
+                        params: {
+                            wdcode: 'zb',
+                            valuecode: valuecode,
+                            sj_valuecode: this.sjValueCode
+                        }
+                    })
+                    .then(response => {
+                        // 填入数据
+                        myChart.setOption({
+                            legend: {
+                                data: response.data.names
+                            },
+
+                            xAxis: [
+                                {
+                                    data: response.data.index
+                                }],
+
+                            series: response.data.data
+                        });
+                    })
+            },
+        }
+    })
+</script>
+
+<script type="text/javascript">
+
+    //
+    var chartOptions = {
+        title: {    // 标题
+            text: '国家统计局数据',
+            x: 'center',
+            top: 10
+        },
+        tooltip: {  // 提示
+            trigger: 'axis',
+            position: function (pt) {
+                return [pt[0], '10%'];
+            }
+        },
+        legend: {   // 指标
+            type: 'scroll',
+            orient: 'vertical',
+            left: '80%',
+            /*data: data.legendData,
+
+            selected: data.selected*/
+        },
+        grid: { // 图表所在绘图区与边界的距离
+            right: '20%',
+            left: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '',
+                position: 'left',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+        ],
+        dataZoom: [{    // 可缩放x轴
+            type: 'inside',
+            start: 0,
+            end: 100
+        }, {
+            start: 0,
+            end: 100,
+            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+            handleSize: '80%',
+            handleStyle: {
+                color: '#fff',
+                shadowBlur: 3,
+                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                shadowOffsetX: 2,
+                shadowOffsetY: 2
+            }
+        }],
+        series: []
+    }
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('pe_chart'));
+
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption(chartOptions);
+
+
+</script>
+</html>
