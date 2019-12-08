@@ -1,0 +1,75 @@
+{% include 'layout/header.html' %}
+
+<div id="app">
+    <div id="pe_chart" style="height:400px;"></div>
+    <div style="font-weight: bold">PE太高下跌风险越高，应考虑卖出，PE太低则上涨概率越高，应考虑买入</div>
+    <div>当PE靠近历史低位时提示买入</div>
+    <div>当PE靠近历史高位时提示卖出</div>
+</div>
+</body>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('pe_chart'));
+
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption({
+        title: {
+            text: 'PE'
+        },
+        tooltip: {},
+        legend: {
+            data: ['上证pe', '深成pe']
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: [
+            {
+                type: 'value',
+                name: '上证pe',
+                position: 'left',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+            {
+                type: 'value',
+                name: '深成pe',
+                position: 'right',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+        ],
+        series: [{
+            name: '',
+            type: 'line',
+            data: []
+        }]
+    });
+
+    // 异步加载数据
+    axios.get("/stock/pe/json")
+        .then(response => {
+            // 填入数据
+            myChart.setOption({
+                xAxis: [
+                    {
+                        data: response.data.sh_pe.dates
+                    }
+                ],
+                series:
+                    response.data.sh_pe.data
+                        .concat(
+                            response.data.sz_pe.data
+                        ).concat(
+                        response.data.buy_point.data
+                    ).concat(
+                        response.data.sell_point.data
+                    )
+            });
+        })
+
+</script>
+</html>

@@ -1,27 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-</head>
-
-<body>
+{% include 'layout/header.html' %}
 
 
 <div id="app">
-
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
-        <el-menu-item index="1" style="height:20px;line-height: 20px"><a href="/" target="_self">指数走势</a></el-menu-item>
-        <el-menu-item index="2" style="height:20px;line-height: 20px"><a href="/m2" target="_self">货币供应</a>
-        </el-menu-item>
-        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/stock_finance/600000.SH" target="_self">个股</a>
-        </el-menu-item>
-        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/select_by_quarter_inc_view"
-                                                                         target="_self">季度</a></el-menu-item>
-        <el-menu-item index="3" style="height:20px;line-height: 20px"><a href="/index_pe_view" target="_self">PE</a>
-        </el-menu-item>
-    </el-menu>
 
     <template>
         <!-- 时间 -->
@@ -45,13 +25,7 @@
     </template>
 </div>
 </body>
-<!-- import Vue before Element -->
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- import JavaScript -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<!-- echart -->
-<script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts.min.js"></script>
+
 
 <script>
     new Vue({
@@ -59,10 +33,10 @@
         data() {
             return {
                 sjItemOptions: [
-                    {name: '2006', value:'2006-'},
-                    {name: '2011', value:'2011-'},
-                    {name: '2013', value:'2013-'},
-                    {name: '2017', value:'2017-'}
+                    {name: '2006', value: '2006-'},
+                    {name: '2011', value: '2011-'},
+                    {name: '2013', value: '2013-'},
+                    {name: '2017', value: '2017-'}
                 ],
                 sjValueCode: '2006-',
                 labelList: [
@@ -71,52 +45,52 @@
                         title: '全国居民消费价格指数',
                         legends: ['居民消费价格指数(上年同月=100)'],
                         tip: "阿斯顿发送到发送到"
-                    },{
+                    }, {
                         valuecode: 'A020A',
                         title: '工业企业主要经济指标',
-                        legends: ['营业收入_累计增长','营业利润_累计增长','亏损企业_增减']
-                    },{
+                        legends: ['营业收入_累计增长', '营业利润_累计增长', '亏损企业_增减']
+                    }, {
                         valuecode: 'A0E01',
                         title: '全国城镇调查失业率',
-                        legends: ['全国城镇调查失业率','31个大城市城镇调查失业率']
-                    },{
+                        legends: ['全国城镇调查失业率', '31个大城市城镇调查失业率']
+                    }, {
                         valuecode: 'A0609',
                         title: '商品房销售',
-                        legends: ['商品房销售额_累计增长','商品房现房销售额_累计增长','商品房期房销售额_累计增长']
-                    },{
+                        legends: ['商品房销售额_累计增长', '商品房现房销售额_累计增长', '商品房期房销售额_累计增长']
+                    }, {
                         valuecode: 'A0601',
                         title: '房地产投资',
                         legends: ['房地产投资_累计增长'],
                         tip: '房地产投资增长比基建股涨提前半年：2015-2016走势'
-                    },{
+                    }, {
                         valuecode: 'A0701',
                         title: '社销品',
-                        legends: ['社会消费品零售总额_同比增长','社会消费品零售总额_累计增长']
-                    },{
+                        legends: ['社会消费品零售总额_同比增长', '社会消费品零售总额_累计增长']
+                    }, {
                         valuecode: 'A0801',
                         title: '进出口总额',
-                        legends: ['出口总值_同比增长','进口总值_同比增长']
-                    },{
+                        legends: ['出口总值_同比增长', '进口总值_同比增长']
+                    }, {
                         valuecode: 'A0B01',
                         title: '采购经理指数',
-                        legends: ['制造业采购经理指数','新订单指数','出厂价格指数']
-                    },{
+                        legends: ['制造业采购经理指数', '新订单指数', '出厂价格指数']
+                    }, {
                         valuecode: 'A0C01',
                         title: '财政收入',
                         legends: ['国家财政收入_累计增长']
-                    },{
+                    }, {
                         valuecode: 'A0C02',
                         title: '财政支出',
                         legends: ['国家财政支出(不含债务还本)_累计增长']
-                    },{
+                    }, {
                         valuecode: 'A0D01',
                         title: '货币供应量',
-                        legends: ['货币和准货币(M2)供应量_同比增长','货币(M1)供应量_同比增长','流通中现金(M0)供应量_同比增长']
-                    },{
+                        legends: ['货币和准货币(M2)供应量_同比增长', '货币(M1)供应量_同比增长', '流通中现金(M0)供应量_同比增长']
+                    }, {
                         valuecode: 'A03010G',
                         title: '发电量',
                         legends: ['发电量_累计增长']
-                    },{
+                    }, {
                         valuecode: 'A0401',
                         title: '固定资产投资概况',
                         legends: ['固定资产投资额_累计增长']
@@ -127,13 +101,18 @@
         created: function () {
         },
         methods: {
-            showAllChart(){
-                for( var i = 0; i < this.labelList.length; i ++){
+            showAllChart() {
+                for (var i = 0; i < this.labelList.length; i++) {
                     var label = this.labelList[i]
                     // init echart
                     var chart = echarts.init(document.getElementById(label.valuecode));
                     // 设置option
                     chart.setOption(chartOptions);
+                    chart.setOption({
+                        title: {
+                            text: label.title
+                        }
+                    })
                     // 画图
                     this.showChart(chart, label)
                 }
@@ -152,19 +131,19 @@
                     .then(response => {
                         // 筛选显示的指标
                         var showLegend = {}
-                        for( var i = 0; i < response.data.names.length; i ++ ){
+                        for (var i = 0; i < response.data.names.length; i++) {
                             var name = response.data.names[i]
-                            if( label.legends.indexOf(name) > -1 ){
+                            if (label.legends.indexOf(name) > -1) {
                                 showLegend[name] = true
-                            }else{
+                            } else {
                                 showLegend[name] = false
                             }
                         }
 
                         // 填入数据
                         chart.setOption({
-                            title:{
-                              text: label.title
+                            title: {
+                                text: label.title
                             },
                             legend: {
                                 data: response.data.names,
@@ -245,8 +224,6 @@
         }],
         series: []
     }
-
-
 
 
 </script>

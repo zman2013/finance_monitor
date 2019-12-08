@@ -1,0 +1,113 @@
+{% include 'layout/header.html' %}
+
+
+<div id="app">
+
+    <div id="chart" style="height:400px;"></div>
+</div>
+</body>
+
+
+<script type="text/javascript">
+
+    //
+    var chartOptions = {
+        title: {    // 标题
+            text: '国家统计局数据',
+            x: 'center',
+            top: 10
+        },
+        tooltip: {  // 提示
+            trigger: 'axis',
+            position: function (pt) {
+                return [pt[0], '10%'];
+            }
+        },
+        legend: {   // 指标
+            type: 'scroll',
+            orient: 'vertical',
+            left: '80%',
+            /*data: data.legendData,
+
+            selected: data.selected*/
+        },
+        grid: { // 图表所在绘图区与边界的距离
+            right: '20%',
+            left: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: [
+            {
+                name: '百分比',
+                type: 'value',
+                scale: true,
+                position: 'left',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },{
+                name: '上证',
+                type: 'value',
+                scale: true,
+                position: 'right',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+        ],
+        dataZoom: [{    // 可缩放x轴
+            type: 'inside',
+            start: 0,
+            end: 100
+        }, {
+            start: 0,
+            end: 100,
+            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+            handleSize: '80%',
+            handleStyle: {
+                color: '#fff',
+                shadowBlur: 3,
+                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                shadowOffsetX: 2,
+                shadowOffsetY: 2
+            }
+        }],
+        series: []
+    }
+
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('chart'));
+
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption(chartOptions);
+
+    // 异步加载数据
+    axios.get("/country_database_m2/json")
+        .then(response => {
+
+            // 填入数据
+            myChart.setOption({
+                title: {
+                    text: '货币供应'
+                },
+                legend: {
+                    data: response.data.names,
+                    selected: {'上证':true,'M1同比-M2同比':true,'M0同比':false,'M1同比':false,'M2同比':false}
+                },
+
+                xAxis: [
+                    {
+                        data: response.data.index
+                    }],
+
+                series: response.data.m2.concat(
+                    response.data.sh_index
+                )
+            });
+        })
+</script>
+</html>

@@ -1,0 +1,80 @@
+{% include 'layout/header.html' %}
+
+<div id="app">
+
+    <div id="mychart" style="height:400px;"></div>
+    <div style="font-weight: bold">分为短期、长期</div>
+    <div>1. 融资余额暴跌，牛转熊的信号，卖出</div>
+    <div style="font-weight: bold">长期对应普通情况：</div>
+    <div>1. 以半年期为时间单位，如果上升即为慢牛</div>
+    <div>2. 以半年期为时间单位，如果下降即为慢熊</div>
+
+</div>
+</body>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('mychart'));
+
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption({
+        title: {
+            text: '融资融券'
+        },
+
+        tooltip: {},
+        legend: {
+            data: ['上证指数', '融资余额', '融券余额', '融资买入额']
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: [
+            {
+                type: 'value',
+                name: '上证指数',
+                position: 'right',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+            {
+                type: 'value',
+                name: '融资融券',
+                position: 'left',
+                axisLabel: {
+                    formatter: '{value} '
+                }
+            },
+        ],
+        series: [{
+            name: '',
+            type: 'line',
+            data: []
+        }]
+    });
+
+    // 异步加载数据
+    axios.get("/stock/margin/json")
+        .then(response => {
+            // 填入数据
+            myChart.setOption({
+                xAxis: [
+                    {
+                        data: response.data.index.dates
+                    }
+                ],
+                series:
+                    response.data.index.data
+                        .concat(
+                            response.data['融资余额'].data
+                        ).concat(
+                        response.data['融券余额'].data
+                    ).concat(
+                        response.data['融资买入额'].data
+                    )
+            });
+        })
+
+</script>
+</html>
