@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 import traceback
+import math
 
 import pandas as pd
 from pandas.tseries.offsets import QuarterEnd
@@ -33,9 +34,10 @@ def load_good_stock_by_quarter():
 
 
 def floatString(value):
-    if value == 'nan%':
+    if value == 'nan%' or value is pd.np.nan:
         return 0
     else:
+        print(value)
         return float(value[:-2])
 
 
@@ -48,25 +50,30 @@ def select_by_quarter():
     start_year = str(this_year - 2)
     start_date = start_year + '0101'
 
+    good_stocks = []
+
     # 加载已分析过的股票信息, 第一列作为index
     if os.path.exists(analysed_stock_file_path):
         analysed_stocks = pd.read_csv(analysed_stock_file_path, index_col=0)
         if os.path.exists(good_stock_file_path):
-            good_stocks = pd.read_csv(good_stock_file_path, index_col=0)
-        else:
-            good_stocks = []
+            existed_good_stocks = pd.read_csv(good_stock_file_path, index_col=0)
+            for index, line in existed_good_stocks.iterrows():
+                stock_info = {}
+                for name, value in line.items():
+                    stock_info[name] = value
+
+                good_stocks.append(stock_info)
     else:
         analysed_stocks = pd.DataFrame({})
-        good_stocks = []
 
     # 遍历每一个股票（即：每一行）
     for index, line in df.iterrows():
         ts_code = line['ts_code']
 
         # 检查是否已经处理过了，如果处理过了，直接跳过
-        if ts_code in analysed_stocks.index:
-            print( ts_code, ' already analysed, skip')
-            continue
+        # if ts_code in analysed_stocks.index:
+        #     print( ts_code, ' already analysed, skip')
+        #     continue
         # 默认置为处理成功
         analysed_stocks.at[ts_code, 'result'] = 'success'
 
@@ -113,7 +120,7 @@ def select_by_quarter():
                         #or cashflow_df.loc[income_df_index, 'n_cashflow_act'] < 0:  # 经营现金流现金流为正
                     print("bad stock[%s]" % ts_code, income_df_line)
                     break
-                if income_df_index == 3:
+                if income_df_index == 1:
                     print("good stock[%s]" % ts_code)
                     with open('/tmp/select_by_quarter_good_stock_code.txt', mode='a+') as file:
                         file.write("%s\n" % ts_code)
