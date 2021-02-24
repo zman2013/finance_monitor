@@ -3,6 +3,7 @@
 import datetime
 import json
 import time
+import traceback
 
 import requests
 from pandas.io.json import json_normalize
@@ -85,6 +86,8 @@ def download_sh_pe(start_date):
                 pe_df = pe_df.append(df)
         except Exception as e:
             print(date, e)
+            print(e)
+            traceback.print_exc()
 
     pe_repo1.save_pe('000001.SH', pe_df)
 
@@ -129,12 +132,18 @@ def download_sz_pe(start_date):
                 'User-Agent': 'Mozilla/5.0(Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36',
             }
 
+            print(url)
+            print(header)
+            print(para)
             r = requests.get(url, params=para, headers=header)
+            print(r.status_code)
+            print(r.headers)
+            print(r.content)
             # 提取数据
             result = r.json()
             tradeAmount = result[0]['data'][11]['brsz'].replace(',', '')
-            pe = result[0]['data'][13]['brsz']
-            exchangeRate = result[0]['data'][14]['brsz']
+            pe = result[0]['data'][12]['brsz']
+            exchangeRate = result[0]['data'][13]['brsz']
 
             # 拼装数据
             data = {}
@@ -152,6 +161,8 @@ def download_sz_pe(start_date):
                 pe_df = pe_df.append(df)
         except Exception as e:
             print(date, e)
+            traceback.print_exc()
+
 
     pe_repo1.save_pe('399001.SZ', pe_df)
 
