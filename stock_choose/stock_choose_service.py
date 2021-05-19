@@ -120,7 +120,7 @@ def select_by_quarter():
                         #or cashflow_df.loc[income_df_index, 'n_cashflow_act'] < 0:  # 经营现金流现金流为正
                     print("bad stock[%s]" % ts_code, income_df_line)
                     break
-                if income_df_index == 1:
+                if income_df_index == 3:
                     print("good stock[%s]" % ts_code)
                     with open('/tmp/select_by_quarter_good_stock_code.txt', mode='a+') as file:
                         file.write("%s\n" % ts_code)
@@ -147,6 +147,9 @@ def select_by_quarter():
                     pe_start_date = str(this_year) + '0101'
                     pe_df = ts_api.daily_basic(ts_code=ts_code, start_date=pe_start_date)
                     cashflow_df.to_csv(stock_finance_dir_path + "/pe_df", index=False)
+                    pe = pe_df.loc[0, 'pe']
+                    if pe > 50:
+                        break
                     stock_info['pe'] = "%0.1f" % pe_df.loc[0, 'pe']
 
                     good_stocks.append(stock_info)
@@ -174,6 +177,8 @@ def select_by_quarter():
 def analyse_income_df(stock_code, start_date):
     income_df = ts_api.income(ts_code=stock_code, start_date=start_date)
     income_df.drop_duplicates(subset='end_date', keep='first', inplace=True)
+    if income_df.empty:
+        return income_df
 
     # 补充单季度数据
     stock_finance_service.add_quarter_data(income_df, 'total_revenue')  # 营业总收入
