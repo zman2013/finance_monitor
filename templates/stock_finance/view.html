@@ -20,8 +20,37 @@
     </template>
 
 </div>
+<link rel="stylesheet" type="text/css" href="/chart/bar/inspector.css">
 </body>
 
+<script type="module">
+
+import define from "/chart/bar/index.js";
+import {Runtime, Library, Inspector} from "/chart/bar/runtime.js";
+
+const runtime = new Runtime();
+const module = runtime.module(define, Inspector.into(document.body));
+
+ // 加载收入业务结构
+    axios.get("/stock_finance/chart/bz/json/{{stock_code}}")
+        .then(async response => {
+            // 填入数据
+            const dates = response.data.dates
+            const items = response.data.items
+            const data = []
+            for( let date of dates ){
+                const d = {date}
+                for( let item of items ){
+                    if( response.data[date][item])
+                        d[item] = response.data[date][item]
+                }
+                data.push(d)
+            }
+            module.redefine('data', data)
+            module.redefine('groupKey', 'date')
+            module.redefine('keys', items)
+        })
+</script>
 <script>
 
     new Vue({
@@ -184,6 +213,9 @@
             });
 
         })
+
+
+
 
 </script>
 </html>
