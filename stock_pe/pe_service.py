@@ -141,9 +141,12 @@ def download_sz_pe(start_date):
             print(r.content)
             # 提取数据
             result = r.json()
-            tradeAmount = result[0]['data'][11]['brsz'].replace(',', '')
-            pe = result[0]['data'][12]['brsz']
-            exchangeRate = result[0]['data'][13]['brsz']
+            # 交易额
+            tradeAmount = result[0]['data'][9]['brsz'].replace(',', '')
+            # 市盈率
+            pe = result[0]['data'][11]['brsz']
+            # 换手率
+            exchangeRate = result[0]['data'][12]['brsz']
 
             # 拼装数据
             data = {}

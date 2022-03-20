@@ -12,7 +12,7 @@ bp = Blueprint('stock', __name__, url_prefix='/stock')
 @bp.route('/pe/<stock_code>')
 def stock_pe_chart(stock_code):
     this_year = int(time.strftime("%Y"))
-    start_year = str(this_year - 6)
+    start_year = str(this_year - 10)
     start_date = start_year + '0101'
 
     pe_df = stock_service.find_pe_df(stock_code, start_date)

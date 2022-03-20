@@ -112,7 +112,9 @@ def compute_yoy(df, label):
             tmp = df[df.end_date == last_year]
             if not tmp.empty:
                 last_year_line = tmp.iloc[-1]
-                if last_year_line[label] is not None:
+                if last_year_line[label] is not None and line[label] is not None:
+                    print(label, line)
+                    print(line[label], last_year_line[label])
                     df.loc[index, yoy_label] = (line[label] - last_year_line[label]) / last_year_line[label] * 100
 
                     # print(line['end_date'], "%0.2f%%" % df.loc[index, yoy_label] )
